@@ -345,18 +345,23 @@ with tab_ask:
     st.caption("Ask questions about any flagged shipping route, surge period, or justification note. Answers are strictly grounded in verified pipeline data.")
 
     # Chip shortcuts
+    if "user_query" not in st.session_state:
+        st.session_state["user_query"] = ""
+
     col_chip1, col_chip2, col_chip3 = st.columns(3)
-    preset_query = None
     if col_chip1.button("Why did Chennai-Bangalore get pricier in March 2025?"):
-        preset_query = "Why did Chennai-Bangalore get pricier in March 2025?"
+        st.session_state["user_query"] = "Why did Chennai-Bangalore get pricier in March 2025?"
+        st.rerun()
     if col_chip2.button("Which flags have no explanation?"):
-        preset_query = "Which flags have no explanation?"
+        st.session_state["user_query"] = "Which flags have no explanation?"
+        st.rerun()
     if col_chip3.button("Why was Ahmedabad-Mumbai flagged in January 2025?"):
-        preset_query = "Why was Ahmedabad-Mumbai flagged in January 2025?"
+        st.session_state["user_query"] = "Why was Ahmedabad-Mumbai flagged in January 2025?"
+        st.rerun()
 
     user_query = st.text_input(
         "Enter your question:",
-        value=preset_query or "",
+        value=st.session_state["user_query"],
         placeholder="e.g., Why did Delhi-Jaipur spike in November 2024?"
     )
 
