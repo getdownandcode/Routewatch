@@ -19,7 +19,7 @@ def weekly_df() -> pd.DataFrame:
 
 
 def test_golden_check_sample_values(weekly_df: pd.DataFrame):
-    """Assert exact match for the three golden sample route-weeks in SPEC.md section 3."""
+    """Assert exact match for the three golden sample route-weeks in case study specification."""
     config = Config.load("config.yaml")
     results = compute_baselines_and_flags(weekly_df, config)
 
@@ -97,7 +97,7 @@ def test_peer_calculation_excludes_self(weekly_df: pd.DataFrame):
 
 
 def test_expected_candidate_count_and_routes(weekly_df: pd.DataFrame):
-    """Verify candidate count equals exactly 9 matching the route-weeks in SPEC.md section 4."""
+    """Verify candidate count equals exactly 9 matching the route-weeks in case study specification."""
     config = Config.load("config.yaml")
     results = compute_baselines_and_flags(weekly_df, config)
 

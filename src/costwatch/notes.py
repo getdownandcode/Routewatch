@@ -26,7 +26,7 @@ class StructuredNote:
     rejection_reason: Optional[str] = None
 
 
-# Canonical verified ground truth from SPEC.md section 6
+# Canonical verified ground truth from case study specification
 VERIFIED_NOTES_MAP: Dict[str, Dict[str, Any]] = {
     "N001": {
         "routes": ["Chennai-Bangalore"],
