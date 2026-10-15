@@ -2,36 +2,7 @@
 
 An AI-powered anomaly detection and grounding system for Indian road freight. It monitors weekly freight costs per tonne-km across commercial routes, flags abnormal cost surges, checks verified real-world context notes (fuel changes, flood detours, festival surcharges), and provides plain-English, zero-hallucination explanations.
 
-```
-+-----------------------------------------------------------------------------------+
-|                                 ROUTEWATCH ARCHITECTURE                           |
-|                                                                                   |
-|  [ Shipment Records ]                                                             |
-|           |                                                                       |
-|           v                                                                       |
-|  [ Weekly Metrics Engine ]  --> Total Cost / Total Tonne-Km (728 route-weeks)     |
-|           |                                                                       |
-|           v                                                                       |
-|  [ Dual-Baseline Flag Gate ]                                                      |
-|       - vs Own History  (trailing 8-wk rolling avg, strictly prior, >= +8%)       |
-|       - vs Similar Routes (peer-avg in same week, exclude self, >= +10%)          |
-|           |                                                                       |
-|           +---------------------------+                                           |
-|           | (9 Candidate Anomalies)   |                                           |
-|           v                           v                                           |
-|  [ Local Vector Retrieval ]    [ Context Notes Corpus ] (10 notes)                |
-|  (all-MiniLM-L6-v2 embeddings)        |                                           |
-|           |                           v                                           |
-|           +-----------------> [ Deterministic Applicability Gate ]                |
-|                               (Route + Window Overlap + Effect + Magnitude)       |
-|                                       |                                           |
-|                                       v                                           |
-|                               [ Verified Template Reasons ]                       |
-|                                       |                                           |
-|                                       v                                           |
-|                               [ outputs/output.csv ]                              |
-+-----------------------------------------------------------------------------------+
-```
+![Routewatch System Architecture](architecture.png)
 
 ---
 
@@ -64,15 +35,15 @@ python eval/run_eval.py
 ## Core Metrics & Mathematical Definitions
 
 1. **Week Grouping (`week_of`)**:
-   - Every shipment date is grouped into Monday–Sunday weeks. `week_of` is the Monday date ($YYYY-MM-DD$).
+   - Every shipment date is grouped into Monday–Sunday weeks. `week_of` is the Monday date (`YYYY-MM-DD`).
 2. **Cost per Tonne-Km**:
-   $$\text{Cost per Tonne-Km} = \frac{\sum \text{freight\_cost\_inr}}{\sum (\text{quantity\_tonnes} \times \text{distance\_km})}$$
-   Computed with unrounded weighted sums; displayed rounded to 2 decimal places.
+   $$\text{Cost per Tonne-Km} = \frac{\sum \text{Freight Cost (INR)}}{\sum (\text{Quantity (Tonnes)} \times \text{Distance (km)})}$$
+   Computed with unrounded weighted sums: `sum(freight_cost_inr) / sum(quantity_tonnes * distance_km)`; displayed rounded to 2 decimal places.
 3. **Vs. Own History (`vs_own_history`)**:
    - Trailing rolling mean over the **previous up-to-8 weeks**, strictly prior to the current week (zero look-ahead).
    - If fewer than 8 prior weeks exist, all available prior weeks are averaged without padding or extrapolation. Week 1 has no history (`N/A`) and cannot be flagged.
    - Percentage difference:
-     $$\text{vs\_own} = \left(\frac{\text{Current Rate}}{\text{Own Rolling Baseline}} - 1\right) \times 100\%$$
+     $$\text{vs}_{\text{own}} = \left(\frac{\text{Current Rate}}{\text{Own Rolling Baseline}} - 1\right) \times 100\%$$
      Formatted as `+35.5% vs this route's past average`.
 4. **Vs. Similar Routes (`vs_similar_routes`)**:
    - Average cost per tonne-km in that same week across all other routes sharing the same `route_type` (*Short*, *Medium*, or *Long*).
