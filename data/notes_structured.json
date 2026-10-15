@@ -1,0 +1,167 @@
+[
+  {
+    "note_id": "N001",
+    "date": "2025-02-24",
+    "applies_to": "Chennai-Bangalore",
+    "original_text": "Heavy flooding on the Chennai-Bangalore highway disrupted normal truck movement from Feb 24 to Mar 8, forcing longer detours and higher trip costs. Roads were passable again by Mar 9.",
+    "routes": [
+      "Chennai-Bangalore"
+    ],
+    "effect": "cost_increase",
+    "affects_dataset": true,
+    "start_date": "2025-02-24",
+    "end_date": "2025-03-08",
+    "window_kind": "explicit_range",
+    "stated_magnitude_pct": null,
+    "paraphrase": "heavy flooding on the highway disrupted truck movement forcing longer detours and higher trip costs",
+    "rejection_reason": null
+  },
+  {
+    "note_id": "N002",
+    "date": "2025-01-20",
+    "applies_to": "Ahmedabad-Mumbai",
+    "original_text": "A regional festival week saw a temporary surcharge applied by transporters on the Ahmedabad-Mumbai corridor due to high demand and limited truck availability.",
+    "routes": [
+      "Ahmedabad-Mumbai"
+    ],
+    "effect": "cost_increase",
+    "affects_dataset": true,
+    "start_date": "2025-01-20",
+    "end_date": "2025-01-26",
+    "window_kind": "single_week",
+    "stated_magnitude_pct": null,
+    "paraphrase": "a regional festival week drove a temporary surcharge on this corridor",
+    "rejection_reason": null
+  },
+  {
+    "note_id": "N003",
+    "date": "2025-05-05",
+    "applies_to": "All Routes",
+    "original_text": "Diesel prices rose nationwide starting this week, pushing up transportation costs across all routes by roughly 5-7%.",
+    "routes": "ALL",
+    "effect": "cost_increase",
+    "affects_dataset": true,
+    "start_date": "2025-05-05",
+    "end_date": null,
+    "window_kind": "open_ended",
+    "stated_magnitude_pct": [
+      5.0,
+      7.0
+    ],
+    "paraphrase": "diesel prices rose nationwide pushing up transportation costs across all routes by roughly 5-7%",
+    "rejection_reason": null
+  },
+  {
+    "note_id": "N004",
+    "date": "2024-03-11",
+    "applies_to": "All Routes",
+    "original_text": "A new toll plaza was commissioned on a national highway stretch, but the affected routes are not part of this dataset.",
+    "routes": "ALL",
+    "effect": "no_cost_effect",
+    "affects_dataset": false,
+    "start_date": "2024-03-11",
+    "end_date": null,
+    "window_kind": "open_ended",
+    "stated_magnitude_pct": null,
+    "paraphrase": "new toll plaza on a highway stretch whose affected routes are not part of this dataset",
+    "rejection_reason": "explicitly states affected routes are not part of this dataset"
+  },
+  {
+    "note_id": "N005",
+    "date": "2024-07-29",
+    "applies_to": "Mumbai-Delhi",
+    "original_text": "Scheduled highway maintenance work between Mumbai and Delhi caused minor delays for about a week; costs were not significantly affected.",
+    "routes": [
+      "Mumbai-Delhi"
+    ],
+    "effect": "no_cost_effect",
+    "affects_dataset": true,
+    "start_date": "2024-07-29",
+    "end_date": "2024-08-04",
+    "window_kind": "single_week",
+    "stated_magnitude_pct": null,
+    "paraphrase": "scheduled highway maintenance caused minor delays but costs were not significantly affected",
+    "rejection_reason": "explicitly states costs were not significantly affected"
+  },
+  {
+    "note_id": "N006",
+    "date": "2025-09-22",
+    "applies_to": "All Routes",
+    "original_text": "A logistics industry report noted overall demand for freight capacity remained stable this quarter with no major disruptions reported.",
+    "routes": "ALL",
+    "effect": "no_cost_effect",
+    "affects_dataset": true,
+    "start_date": "2025-09-22",
+    "end_date": null,
+    "window_kind": "open_ended",
+    "stated_magnitude_pct": null,
+    "paraphrase": "mentions stable demand with no major disruptions",
+    "rejection_reason": "mentions stable demand with no major disruptions and describes no cost rise"
+  },
+  {
+    "note_id": "N007",
+    "date": "2024-05-20",
+    "applies_to": "Delhi-Jaipur",
+    "original_text": "Local authorities announced improved road conditions on the Delhi-Jaipur stretch after resurfacing work was completed.",
+    "routes": [
+      "Delhi-Jaipur"
+    ],
+    "effect": "cost_decrease",
+    "affects_dataset": true,
+    "start_date": "2024-05-20",
+    "end_date": null,
+    "window_kind": "open_ended",
+    "stated_magnitude_pct": null,
+    "paraphrase": "improved road conditions after resurfacing work was completed",
+    "rejection_reason": "describes improved conditions/cost reduction, not an explanation for a cost rise"
+  },
+  {
+    "note_id": "N008",
+    "date": "2025-06-09",
+    "applies_to": "Kolkata-Bhubaneswar",
+    "original_text": "No significant disruptions were reported on the Kolkata-Bhubaneswar corridor this quarter; freight movement remained normal.",
+    "routes": [
+      "Kolkata-Bhubaneswar"
+    ],
+    "effect": "no_cost_effect",
+    "affects_dataset": true,
+    "start_date": "2025-06-09",
+    "end_date": null,
+    "window_kind": "open_ended",
+    "stated_magnitude_pct": null,
+    "paraphrase": "freight movement remained normal with no significant disruptions",
+    "rejection_reason": "reports normal freight movement with no disruptions"
+  },
+  {
+    "note_id": "N009",
+    "date": "2025-03-17",
+    "applies_to": "Chennai-Bangalore",
+    "original_text": "Highway authorities confirmed the Chennai-Bangalore route returned to normal conditions after flood-related repairs were completed.",
+    "routes": [
+      "Chennai-Bangalore"
+    ],
+    "effect": "recovery_to_normal",
+    "affects_dataset": true,
+    "start_date": "2025-03-17",
+    "end_date": null,
+    "window_kind": "open_ended",
+    "stated_magnitude_pct": null,
+    "paraphrase": "highway returned to normal conditions after flood repairs completed",
+    "rejection_reason": "confirms route returned to normal conditions, does not explain a cost rise"
+  },
+  {
+    "note_id": "N010",
+    "date": "2025-10-27",
+    "applies_to": "All Routes",
+    "original_text": "A new vehicle tracking mandate was introduced for commercial fleets; compliance costs were absorbed by transporters without a rate change.",
+    "routes": "ALL",
+    "effect": "no_cost_effect",
+    "affects_dataset": true,
+    "start_date": "2025-10-27",
+    "end_date": null,
+    "window_kind": "open_ended",
+    "stated_magnitude_pct": null,
+    "paraphrase": "vehicle tracking mandate costs were absorbed by transporters without a rate change",
+    "rejection_reason": "explicitly states fleet compliance costs were absorbed without a rate change"
+  }
+]
