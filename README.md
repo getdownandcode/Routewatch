@@ -4,6 +4,8 @@ An AI-powered anomaly detection and grounding system for Indian road freight. It
 
 ![Routewatch System Architecture](architecture.png)
 
+*For detailed layer breakdown, request flows, and decision gate diagrams, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).*
+
 ---
 
 ## Quick Start (Run in 3 Commands)

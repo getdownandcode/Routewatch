@@ -1,0 +1,38 @@
+flowchart LR
+    %% ==========================================
+    %% DIAGRAM 3: DEPLOYMENT & RUNTIME TOPOLOGY
+    %% ==========================================
+
+    subgraph HOST ["Local Host Environment (Developer / Analyst Workstation)"]
+        direction TB
+        subgraph RUNTIME ["Python 3.12 Virtual Environment (.venv)"]
+            CLI_PROC["Pipeline Process<br/><code>python run.py</code>"]
+            UI_PROC["Streamlit Web Server<br/><code>streamlit run app/app.py (:8501)</code>"]
+            EMB_PROC["SentenceTransformers<br/><code>all-MiniLM-L6-v2 (Local CPU)</code>"]
+        end
+
+        DISK[("Local Filesystem<br/>- data/ (Inputs & Vectors)<br/>- outputs/ (output.csv & Cache)")]
+    end
+
+    subgraph CLOUD ["External Cloud & Git Providers"]
+        direction TB
+        GEMINI_CLOUD{{"Google Gemini API<br/><code>gemini-2.5-flash (HTTPS)</code>"}}
+        GITHUB_REMOTE["GitHub Repository<br/><code>getdownandcode/Routewatch.git</code>"]
+    end
+
+    %% Interactions
+    CLI_PROC <-->|"In-Memory Vector Search"| EMB_PROC
+    UI_PROC <-->|"Grounded Q&A Queries"| CLI_PROC
+    CLI_PROC <-->|"Reads Inputs / Writes Outputs & Cache"| DISK
+    UI_PROC <-->|"Reads outputs/output.csv"| DISK
+
+    CLI_PROC -.->|"One-time structuring / Q&A<br/>(Temperature 0, Cached)"| GEMINI_CLOUD
+    HOST <==>|"Git Push / Pull (HTTPS / SSH)"| GITHUB_REMOTE
+
+    classDef runtime fill:#e0f2fe,stroke:#0284c7,stroke-width:1.5px,color:#0f172a;
+    classDef storage fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#0f172a;
+    classDef cloud fill:#fee2e2,stroke:#dc2626,stroke-width:1.5px,color:#0f172a;
+
+    class CLI_PROC,UI_PROC,EMB_PROC runtime;
+    class DISK storage;
+    class GEMINI_CLOUD,GITHUB_REMOTE cloud;

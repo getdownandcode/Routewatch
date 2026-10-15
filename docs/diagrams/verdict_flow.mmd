@@ -1,0 +1,46 @@
+flowchart LR
+    %% ==========================================
+    %% DIAGRAM 2: VERDICT DECISION GATE FLOW (LR)
+    %% ==========================================
+
+    START(["Candidate Anomaly<br/><code>vs_own >= +8%<br/>vs_peer >= +10%</code>"]):::candidate --> RET
+
+    RET["1. Semantic Search<br/>(retrieval.py)<br/>Filter route + Cosine rank"]:::ai --> LOOP
+
+    LOOP{"Evaluate<br/>Candidate Note"}:::gate
+
+    subgraph GateChecks ["Deterministic Applicability Gate (verdict.py)"]
+        direction TB
+        C1{"1. Route Match?<br/>route or ALL"}:::gate
+        C2{"2. Time Overlap?<br/>[week_of, week_of+6]"}:::gate
+        C3{"3. Cost Increase?<br/>effect == cost_increase"}:::gate
+        C4{"4. Magnitude Check?<br/>within tolerance"}:::gate
+
+        C1 -- Pass --> C2
+        C2 -- Pass --> C3
+        C3 -- Pass --> C4
+    end
+
+    LOOP --> C1
+
+    %% Rejection
+    C1 -- Fail --> REJ["Rejection Handler<br/>• Wrong corridor / outside dataset (N004)<br/>• Window expired / Starts after week<br/>• No cost effect (N005, N006, N008, N010)<br/>• Recovery / Road improved (N009, N007)<br/>• Surge exceeds stated magnitude"]:::rejection
+    C2 -- Fail --> REJ
+    C3 -- Fail --> REJ
+    C4 -- Fail --> REJ
+
+    REJ --> NEXT{"More notes<br/>in queue?"}:::gate
+    NEXT -- Yes --> LOOP
+
+    %% Verdicts
+    C4 -- Pass --> JUSTIFIED["Verdict: 'No (justified)'<br/><b>matched_note_id = note.note_id</b><br/>Template: 'Matches note {id} dated {date}: {paraphrase}...'"]:::justified
+
+    NEXT -- No: All rejected --> UNEXPLAINED["Verdict: 'Yes' (Needs Human Review)<br/><b>matched_note_id = '' (blank)</b><br/>Template: 'The closest note ({id}, {date}) {reason}...' OR 'No matching note found...'"]:::unexplained
+
+    %% Class Styling
+    classDef candidate fill:#fee2e2,stroke:#dc2626,stroke-width:1.5px,color:#991b1b,font-weight:bold;
+    classDef ai fill:#f3e8ff,stroke:#9333ea,stroke-width:1.5px,color:#581c87;
+    classDef gate fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#92400e;
+    classDef rejection fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#334155,stroke-dasharray: 3 3;
+    classDef justified fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d,font-weight:bold;
+    classDef unexplained fill:#fee2e2,stroke:#b91c1c,stroke-width:2px,color:#7f1d1d,font-weight:bold;
