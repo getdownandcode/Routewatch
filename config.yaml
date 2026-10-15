@@ -1,0 +1,32 @@
+# CostWatch configuration
+# All thresholds and hyperparameters defined centrally to eliminate magic numbers.
+
+# History & Peer Baselines
+rolling_weeks: 8
+min_history_weeks: 4
+own_threshold_pct: 8.0
+peer_threshold_pct: 10.0
+
+# Note Applicability Window & Magnitude Gate
+open_ended_max_weeks: 8
+magnitude_check: true
+magnitude_tolerance_pp: 10.0
+
+# Retrieval & LLM
+top_k: 5
+embedding_model: "all-MiniLM-L6-v2"
+model_name: "gemini-2.5-flash"
+temperature: 0
+
+# Paths
+paths:
+  shipments: "data/shipment_records.csv"
+  notes: "data/context_notes.csv"
+  sample_output: "data/sample_output_format_v2.csv"
+  notes_structured: "data/notes_structured.json"
+  note_embeddings: "data/note_embeddings.npy"
+  weekly_metrics: "outputs/weekly_metrics.csv"
+  output_csv: "outputs/output.csv"
+  llm_calls: "outputs/llm_calls.jsonl"
+  llm_cache_dir: "outputs/cache"
+  eval_cases: "eval/labeled_cases.csv"
