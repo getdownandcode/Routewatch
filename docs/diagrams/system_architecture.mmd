@@ -1,117 +1,30 @@
-flowchart TB
+flowchart LR
     %% ==========================================
-    %% ROUTEWATCH SYSTEM ARCHITECTURE (LAYERED)
+    %% ROUTEWATCH CLEAN BALANCED ARCHITECTURE
     %% ==========================================
 
-    subgraph Users ["User / Operational Roles"]
-        ANALYST["Operations Analyst / Reviewer"]
-    end
-
-    subgraph L1 ["1. Interface Layer"]
-        CLI["Pipeline CLI<br/><code>run.py</code>"]
-        UI["Review Dashboard & Q&A<br/><code>app/app.py (Streamlit)</code><br/><i>[Optional]</i>"]
-    end
-
-    subgraph L2 ["2. Orchestration & Configuration Layer"]
-        ORCH["Pipeline Orchestrator<br/><code>run.py (main / run_pipeline)</code>"]
-        CFG["Config Manager<br/><code>config.yaml & src/costwatch/config.py</code>"]
-        ENV["Secrets Management<br/><code>.env (API keys, gitignored)</code>"]
-    end
-
-    subgraph L3 ["3. Core Analytics Layer (Deterministic)"]
-        METRICS["Metrics Engine<br/><code>src/costwatch/metrics.py</code><br/>Monday-week grouping, Cost / Tonne-Km"]
-        FLAGS["Baseline & Flag Engine<br/><code>src/costwatch/flags.py</code><br/>Trailing 8-wk mean, Peer average, 8/10 Rule"]
-    end
-
-    subgraph L4 ["4. Grounding & Decision Layer (Deterministic - Trust Boundary)"]
+    subgraph Pipeline ["Routewatch Shipping Cost Assistant"]
         direction TB
-        VERDICT["Verdict Gate & Reason Formatter<br/><code>src/costwatch/verdict.py</code><br/>Route match, Date overlap, Effect & Magnitude checks"]
-        REPORT["Report Writer<br/><code>src/costwatch/report.py</code><br/>Contract CSV formatting with strict quoting"]
-        BOUNDARY["TRUST BOUNDARY<br/>Gate decides, templates write text. Zero LLM hallucinations."]
+
+        subgraph Row1 ["Step 1 to 3: Ingestion to Anomaly Detection"]
+            direction LR
+            D1["1. Data Ingestion<br/><b>Shipment & Disruption Notes</b><br/>2,940 trips across 7 routes"]:::data -->|"Raw shipments"| D2["2. Cost Analytics<br/><b>Weekly Rate Engine</b><br/>Total Cost / (Tonnes x Km)"]:::analytics
+            D2 -->|"Weekly rates"| D3["3. Anomaly Detection<br/><b>Dual-Baseline Detector</b><br/>Flags >= 8% own & >= 10% peers"]:::flags
+        end
+
+        subgraph Row2 ["Step 4 to 6: Verification to Operations Delivery"]
+            direction LR
+            D4["4. AI Search & Verification<br/><b>Deterministic Gate</b><br/>Matches notes with zero hallucination"]:::gate -->|"Verified verdicts"| D5["5. Audit Reports<br/><b>Contract Output CSV</b><br/>Justified & unexplained rows"]:::out
+            D5 -->|"Loads report"| D6["6. User Interface<br/><b>Dashboard & CLI</b><br/>Interactive review & Q&A"]:::ui
+        end
+
+        Row1 -->|"Flagged cost surges"| Row2
     end
 
-    subgraph L5 ["5. AI & Retrieval Layer"]
-        direction TB
-        NOTES["Notes Structuring<br/><code>src/costwatch/notes.py</code><br/>One-time LLM structuring"]
-        RETRIEVAL["Vector Retrieval<br/><code>src/costwatch/retrieval.py</code><br/>Metadata filter + Cosine similarity"]
-        QA["Grounded Q&A Engine<br/><code>src/costwatch/qa.py</code><br/>Answers strictly from output.csv & notes"]
-        LLM["LLM Client<br/><code>src/costwatch/llm.py</code><br/>Temp 0, Disk cache, Call logging"]
-    end
-
-    subgraph L6 ["6. Data & Artifact Storage Layer"]
-        IN_DATA[("Raw Inputs<br/><code>data/shipment_records.csv</code><br/><code>data/context_notes.csv</code>")]
-        DERIVED_DATA[("Derived Artifacts<br/><code>data/notes_structured.json</code><br/><code>data/note_embeddings.npy</code><br/><code>outputs/weekly_metrics.csv</code>")]
-        CACHE_DATA[("LLM Audit & Cache<br/><code>outputs/cache/*.json</code><br/><code>outputs/llm_calls.jsonl</code>")]
-        OUT_CSV[("Deliverable Contract<br/><code>outputs/output.csv</code>")]
-    end
-
-    subgraph EXT ["External Services"]
-        GEMINI{{"Google Gemini API<br/>(Free Tier / Structured JSON)"}}
-        EMB_MODEL{{"SentenceTransformers<br/>(all-MiniLM-L6-v2 Local)"}}
-    end
-
-    subgraph L7 ["7. Quality & Observability (Cross-Cutting)"]
-        TESTS["Test Suite<br/><code>tests/ (pytest: 23 tests)</code>"]
-        EVAL["Evaluation Harness<br/><code>eval/run_eval.py (28 cases)</code>"]
-        REPRO["Reproducibility Script<br/><code>scripts/repro.sh (3x SHA-256)</code>"]
-        AUDIT["Token & Cost Audit<br/><code>outputs/token_log.md</code>"]
-        DECISIONS["Architecture Log<br/><code>docs/DECISIONS.md</code>"]
-    end
-
-    %% Inter-Layer Flows
-    ANALYST -->|"1. CLI command / Web query"| L1
-    CLI -->|"2. Orchestrates execution"| ORCH
-    UI -->|"Inspects results & submits Q&A"| ORCH
-    UI -.->|"Reads display data"| OUT_CSV
-    UI -.->|"Invokes grounded Q&A"| QA
-
-    CFG -.->|"Loads parameters & thresholds"| ORCH
-    ENV -.->|"Supplies GEMINI_API_KEY"| LLM
-
-    ORCH -->|"Reads shipment data"| IN_DATA
-    IN_DATA -->|"Raw shipments"| METRICS
-    METRICS -->|"3. 728 route-week metrics"| FLAGS
-    METRICS -.->|"Writes raw metrics"| DERIVED_DATA
-    FLAGS -->|"4. 9 candidate anomaly spikes"| VERDICT
-
-    NOTES -->|"Reads notes"| IN_DATA
-    NOTES -.->|"Serializes verified notes"| DERIVED_DATA
-    DERIVED_DATA -.->|"Loads structured notes & vectors"| RETRIEVAL
-    RETRIEVAL -->|"5. Proposes top-k candidate notes"| VERDICT
-
-    VERDICT -->|"6. Grounded verdict & matched note ID"| REPORT
-    REPORT -->|"7. Writes contract output"| OUT_CSV
-
-    QA -.->|"Reads evidence"| OUT_CSV
-    QA -.->|"Reads notes"| DERIVED_DATA
-
-    %% External Connections (Restricted strictly to AI layer)
-    LLM <-->|"One-time JSON structuring / Q&A"| GEMINI
-    LLM -.->|"Reads/writes disk cache"| CACHE_DATA
-    NOTES -->|"Calls cached client"| LLM
-    QA -->|"Calls cached client"| LLM
-    RETRIEVAL <-->|"Generates 384-dim embeddings"| EMB_MODEL
-
-    %% Quality & Observability Audits
-    TESTS -.->|"Validates correctness"| L3
-    TESTS -.->|"Asserts golden rows & gates"| L4
-    EVAL -.->|"Audits zero fabrications"| L4
-    REPRO -.->|"Verifies identical SHA-256"| OUT_CSV
-    AUDIT -.->|"Tracks tokens & zero spend"| CACHE_DATA
-
-    %% Class Styling
-    classDef deterministic fill:#e0f2fe,stroke:#0284c7,stroke-width:1.5px,color:#0f172a;
-    classDef aiLayer fill:#f3e8ff,stroke:#9333ea,stroke-width:1.5px,color:#0f172a;
-    classDef storage fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#0f172a;
-    classDef external fill:#fee2e2,stroke:#dc2626,stroke-width:1.5px,color:#0f172a;
-    classDef quality fill:#f1f5f9,stroke:#475569,stroke-width:1.5px,color:#0f172a;
-    classDef optionalUI fill:#f8fafc,stroke:#64748b,stroke-width:1.5px,stroke-dasharray: 5 5,color:#0f172a;
-    classDef boundaryCallout fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d,font-weight:bold;
-
-    class CLI,ORCH,CFG,ENV,METRICS,FLAGS,VERDICT,REPORT deterministic;
-    class NOTES,RETRIEVAL,QA,LLM aiLayer;
-    class IN_DATA,DERIVED_DATA,CACHE_DATA,OUT_CSV storage;
-    class GEMINI,EMB_MODEL external;
-    class TESTS,EVAL,REPRO,AUDIT,DECISIONS,ANALYST quality;
-    class UI optionalUI;
-    class BOUNDARY boundaryCallout;
+    %% Clean, harmonious styling
+    classDef data fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f;
+    classDef analytics fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e;
+    classDef flags fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d;
+    classDef gate fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d;
+    classDef out fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a;
+    classDef ui fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px,color:#1e1b4b;
