@@ -88,7 +88,7 @@ A context note can **only** justify an anomaly if ALL 4 rules pass:
    - `single_week`: `[start_date, start_date + 6 days]`
    - `open_ended`: capped at `open_ended_max_weeks: 8` weeks.
 3. **Effect Check**: Must be `effect == "cost_increase"`. Notes with `no_cost_effect`, `cost_decrease`, or `recovery_to_normal` are rejected.
-4. **Magnitude Check**: If a note specifies expected rise (e.g. N003: 5–7%), observed increases exceeding $17.0\%$ ($7\% + 10\%$ tolerance) are flagged as unexplained.
+4. **Magnitude Check**: If a note specifies expected rise (e.g. N003: 5–7%), observed increases exceeding 17.0% (7% + 10% tolerance) are flagged as unexplained.
 
 ### Permitted vs. Trap Notes
 - **Permitted Justifiers**: **Only N001, N002, and N003** can ever justify a cost rise.
@@ -115,7 +115,7 @@ Tested against 28 labeled cases (`eval/labeled_cases.csv`) covering all trap not
 Output hashes are byte-identical across runs.
 
 ### Token & Spend Audit (`outputs/token_log.md`)
-- **Cold Run (first time, structuring 10 notes)**: 10 calls, 1,240 input tokens, 1,450 output tokens. Free tier: **₹0.00**. (Paid equivalent: $0.00053).
+- **Cold Run (first time, structuring 10 notes)**: 10 calls, 1,240 input tokens, 1,450 output tokens. Free tier: **₹0.00**. (Paid equivalent: \$0.00053).
 - **Warm Run (production / regular pipeline)**: **0 LLM calls**, ₹0.00 spend.
 
 ---
