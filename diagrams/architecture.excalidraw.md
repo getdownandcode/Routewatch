@@ -1,0 +1,756 @@
+---
+excalidraw-plugin: parsed
+tags:
+  - excalidraw
+  - system-design
+  - architecture
+---
+# Routewatch System Architecture
+
+%%
+# Excalidraw Data
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "title",
+      "type": "text",
+      "x": 60,
+      "y": 40,
+      "text": "Routewatch System Architecture",
+      "fontSize": 24,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:37:13.747Z",
+      "updatedAt": "2026-10-15T06:37:13.747Z",
+      "version": 1
+    },
+    {
+      "id": "subtitle",
+      "type": "text",
+      "x": 60,
+      "y": 75,
+      "strokeColor": "#6B7280",
+      "text": "AI Shipping-Cost Anomaly Detection & Deterministic Grounding Assistant",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:37:13.748Z",
+      "updatedAt": "2026-10-15T06:37:13.748Z",
+      "version": 1
+    },
+    {
+      "id": "zone-ingest",
+      "type": "rectangle",
+      "x": 60,
+      "y": 120,
+      "width": 330,
+      "height": 280,
+      "backgroundColor": "transparent",
+      "strokeColor": "#94a3b8",
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "createdAt": "2026-10-15T06:37:13.748Z",
+      "updatedAt": "2026-10-15T06:37:13.748Z",
+      "version": 1
+    },
+    {
+      "id": "zone-ingest-title",
+      "type": "text",
+      "x": 80,
+      "y": 135,
+      "strokeColor": "#334155",
+      "text": "1. Data Ingestion Tier",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:37:13.749Z",
+      "updatedAt": "2026-10-15T06:37:13.749Z",
+      "version": 1
+    },
+    {
+      "id": "shipment-csv",
+      "type": "rectangle",
+      "x": 85,
+      "y": 175,
+      "width": 280,
+      "height": 80,
+      "backgroundColor": "#dbeafe",
+      "strokeColor": "#2563eb",
+      "roughness": 1,
+      "label": {
+        "text": "Shipment Records CSV\n2,940 shipments, 104 weeks, 7 routes"
+      },
+      "createdAt": "2026-10-15T06:37:13.749Z",
+      "updatedAt": "2026-10-15T06:37:13.749Z",
+      "version": 1
+    },
+    {
+      "id": "notes-csv",
+      "type": "rectangle",
+      "x": 85,
+      "y": 285,
+      "width": 280,
+      "height": 80,
+      "backgroundColor": "#fef3c7",
+      "strokeColor": "#d97706",
+      "roughness": 1,
+      "label": {
+        "text": "Context Notes CSV\n10 operational disruption notes"
+      },
+      "createdAt": "2026-10-15T06:37:13.749Z",
+      "updatedAt": "2026-10-15T06:37:13.749Z",
+      "version": 1
+    },
+    {
+      "id": "zone-metrics",
+      "type": "rectangle",
+      "x": 430,
+      "y": 120,
+      "width": 350,
+      "height": 480,
+      "backgroundColor": "transparent",
+      "strokeColor": "#94a3b8",
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "createdAt": "2026-10-15T06:37:13.749Z",
+      "updatedAt": "2026-10-15T06:37:13.749Z",
+      "version": 1
+    },
+    {
+      "id": "zone-metrics-title",
+      "type": "text",
+      "x": 450,
+      "y": 135,
+      "strokeColor": "#334155",
+      "text": "2. Metrics & Baselines Engine",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:37:13.750Z",
+      "updatedAt": "2026-10-15T06:37:13.750Z",
+      "version": 1
+    },
+    {
+      "id": "metrics-agg",
+      "type": "rectangle",
+      "x": 455,
+      "y": 175,
+      "width": 300,
+      "height": 75,
+      "backgroundColor": "#e0e7ff",
+      "strokeColor": "#4f46e5",
+      "roughness": 1,
+      "label": {
+        "text": "Weekly Metrics Engine\nTotal Cost / Total Tonne-Km (728 rows)"
+      },
+      "createdAt": "2026-10-15T06:37:13.750Z",
+      "updatedAt": "2026-10-15T06:37:13.750Z",
+      "version": 1
+    },
+    {
+      "id": "own-baseline",
+      "type": "rectangle",
+      "x": 455,
+      "y": 275,
+      "width": 300,
+      "height": 65,
+      "backgroundColor": "#f1f5f9",
+      "strokeColor": "#475569",
+      "roughness": 1,
+      "label": {
+        "text": "vs Own History Baseline\nTrailing 8-wk rolling mean (strictly prior)"
+      },
+      "createdAt": "2026-10-15T06:37:13.750Z",
+      "updatedAt": "2026-10-15T06:37:13.750Z",
+      "version": 1
+    },
+    {
+      "id": "peer-baseline",
+      "type": "rectangle",
+      "x": 455,
+      "y": 360,
+      "width": 300,
+      "height": 65,
+      "backgroundColor": "#f1f5f9",
+      "strokeColor": "#475569",
+      "roughness": 1,
+      "label": {
+        "text": "vs Similar Routes Baseline\nSame length tier peer avg (exclude self)"
+      },
+      "createdAt": "2026-10-15T06:37:13.750Z",
+      "updatedAt": "2026-10-15T06:37:13.751Z",
+      "version": 1
+    },
+    {
+      "id": "flag-gate",
+      "type": "rectangle",
+      "x": 455,
+      "y": 455,
+      "width": 300,
+      "height": 95,
+      "backgroundColor": "#fee2e2",
+      "strokeColor": "#dc2626",
+      "roughness": 1,
+      "label": {
+        "text": "Dual-Baseline Candidate Gate\nvs_own >= +8% AND vs_peer >= +10%\n(Identifies 9 Candidate Spikes)"
+      },
+      "createdAt": "2026-10-15T06:37:13.751Z",
+      "updatedAt": "2026-10-15T06:37:13.751Z",
+      "version": 1
+    },
+    {
+      "id": "zone-grounding",
+      "type": "rectangle",
+      "x": 820,
+      "y": 120,
+      "width": 390,
+      "height": 480,
+      "backgroundColor": "transparent",
+      "strokeColor": "#94a3b8",
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "createdAt": "2026-10-15T06:37:13.751Z",
+      "updatedAt": "2026-10-15T06:37:13.751Z",
+      "version": 1
+    },
+    {
+      "id": "zone-grounding-title",
+      "type": "text",
+      "x": 840,
+      "y": 135,
+      "strokeColor": "#334155",
+      "text": "3. Grounding & Deterministic Gates",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:37:13.751Z",
+      "updatedAt": "2026-10-15T06:37:13.751Z",
+      "version": 1
+    },
+    {
+      "id": "structured-notes",
+      "type": "rectangle",
+      "x": 845,
+      "y": 175,
+      "width": 340,
+      "height": 70,
+      "backgroundColor": "#fef3c7",
+      "strokeColor": "#d97706",
+      "roughness": 1,
+      "label": {
+        "text": "Structured Notes Cache\ndata/notes_structured.json (10 notes)"
+      },
+      "createdAt": "2026-10-15T06:37:13.751Z",
+      "updatedAt": "2026-10-15T06:37:13.751Z",
+      "version": 1
+    },
+    {
+      "id": "vector-retriever",
+      "type": "rectangle",
+      "x": 845,
+      "y": 265,
+      "width": 340,
+      "height": 80,
+      "backgroundColor": "#f3e8ff",
+      "strokeColor": "#9333ea",
+      "roughness": 1,
+      "label": {
+        "text": "Local Vector Retrieval\nall-MiniLM-L6-v2 embeddings + Cosine\n(Retrieval Proposes Candidates)"
+      },
+      "createdAt": "2026-10-15T06:37:13.751Z",
+      "updatedAt": "2026-10-15T06:37:13.751Z",
+      "version": 1
+    },
+    {
+      "id": "verdict-gate",
+      "type": "rectangle",
+      "x": 845,
+      "y": 365,
+      "width": 340,
+      "height": 185,
+      "backgroundColor": "#dcfce7",
+      "strokeColor": "#16a34a",
+      "roughness": 1,
+      "label": {
+        "text": "Deterministic Applicability Gate\n[Gate Strictly Decides - verdict.py]\n1. Route Match (route or ALL, affects_dataset)\n2. Window Overlap ([week_of, week_of+6])\n3. Cost Increase Effect (N001-N003 only)\n4. Magnitude Check (tolerance <= 10pp)"
+      },
+      "createdAt": "2026-10-15T06:37:13.752Z",
+      "updatedAt": "2026-10-15T06:37:13.752Z",
+      "version": 1
+    },
+    {
+      "id": "zone-outputs",
+      "type": "rectangle",
+      "x": 1250,
+      "y": 120,
+      "width": 350,
+      "height": 480,
+      "backgroundColor": "transparent",
+      "strokeColor": "#94a3b8",
+      "strokeStyle": "dashed",
+      "roughness": 1,
+      "createdAt": "2026-10-15T06:37:13.752Z",
+      "updatedAt": "2026-10-15T06:37:13.752Z",
+      "version": 1
+    },
+    {
+      "id": "zone-outputs-title",
+      "type": "text",
+      "x": 1270,
+      "y": 135,
+      "strokeColor": "#334155",
+      "text": "4. Outputs & Interfaces",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:37:13.753Z",
+      "updatedAt": "2026-10-15T06:37:13.753Z",
+      "version": 1
+    },
+    {
+      "id": "template-reasons",
+      "type": "rectangle",
+      "x": 1275,
+      "y": 175,
+      "width": 300,
+      "height": 70,
+      "backgroundColor": "#dcfce7",
+      "strokeColor": "#16a34a",
+      "roughness": 1,
+      "label": {
+        "text": "Verified Template Formatter\nZero free-form LLM text (No Hallucination)"
+      },
+      "createdAt": "2026-10-15T06:37:13.753Z",
+      "updatedAt": "2026-10-15T06:37:13.753Z",
+      "version": 1
+    },
+    {
+      "id": "contract-csv",
+      "type": "rectangle",
+      "x": 1275,
+      "y": 265,
+      "width": 300,
+      "height": 80,
+      "backgroundColor": "#dbeafe",
+      "strokeColor": "#2563eb",
+      "roughness": 1,
+      "label": {
+        "text": "Contract Output CSV\noutputs/output.csv\n(Justified: N001/N002 | Unexplained: blank)"
+      },
+      "createdAt": "2026-10-15T06:37:13.753Z",
+      "updatedAt": "2026-10-15T06:37:13.753Z",
+      "version": 1
+    },
+    {
+      "id": "dashboard-ui",
+      "type": "rectangle",
+      "x": 1275,
+      "y": 365,
+      "width": 300,
+      "height": 75,
+      "backgroundColor": "#e0e7ff",
+      "strokeColor": "#4f46e5",
+      "roughness": 1,
+      "label": {
+        "text": "Operations Review Dashboard\napp/app.py (Streamlit)\nTrajectory line charts & Waybill cards"
+      },
+      "createdAt": "2026-10-15T06:37:13.754Z",
+      "updatedAt": "2026-10-15T06:37:13.754Z",
+      "version": 1
+    },
+    {
+      "id": "grounded-qa",
+      "type": "rectangle",
+      "x": 1275,
+      "y": 460,
+      "width": 300,
+      "height": 75,
+      "backgroundColor": "#f3e8ff",
+      "strokeColor": "#9333ea",
+      "roughness": 1,
+      "label": {
+        "text": "Grounded Q&A Engine\nsrc/costwatch/qa.py (Temperature 0)\nStrictly answers from verified results"
+      },
+      "createdAt": "2026-10-15T06:37:13.754Z",
+      "updatedAt": "2026-10-15T06:37:13.754Z",
+      "version": 1
+    },
+    {
+      "id": "arr-shipment-metrics",
+      "type": "arrow",
+      "x": 372.99982687542604,
+      "y": 214.02631692845114,
+      "strokeColor": "#2563eb",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          74.00034624914792,
+          -0.48684438321808443
+        ]
+      ],
+      "start": {
+        "id": "shipment-csv"
+      },
+      "end": {
+        "id": "metrics-agg"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.754Z",
+      "updatedAt": "2026-10-15T06:37:13.754Z",
+      "version": 1
+    },
+    {
+      "id": "arr-metrics-own",
+      "type": "arrow",
+      "x": 605,
+      "y": 258,
+      "strokeColor": "#4f46e5",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          9
+        ]
+      ],
+      "start": {
+        "id": "metrics-agg"
+      },
+      "end": {
+        "id": "own-baseline"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.755Z",
+      "updatedAt": "2026-10-15T06:37:13.755Z",
+      "version": 1
+    },
+    {
+      "id": "arr-metrics-peer",
+      "type": "arrow",
+      "x": 605,
+      "y": 258,
+      "strokeColor": "#4f46e5",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          94
+        ]
+      ],
+      "start": {
+        "id": "metrics-agg"
+      },
+      "end": {
+        "id": "peer-baseline"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.755Z",
+      "updatedAt": "2026-10-15T06:37:13.755Z",
+      "version": 1
+    },
+    {
+      "id": "arr-own-flag",
+      "type": "arrow",
+      "x": 605,
+      "y": 348,
+      "strokeColor": "#475569",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          99
+        ]
+      ],
+      "start": {
+        "id": "own-baseline"
+      },
+      "end": {
+        "id": "flag-gate"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.756Z",
+      "updatedAt": "2026-10-15T06:37:13.756Z",
+      "version": 1
+    },
+    {
+      "id": "arr-peer-flag",
+      "type": "arrow",
+      "x": 605,
+      "y": 433,
+      "strokeColor": "#475569",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          14
+        ]
+      ],
+      "start": {
+        "id": "peer-baseline"
+      },
+      "end": {
+        "id": "flag-gate"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.756Z",
+      "updatedAt": "2026-10-15T06:37:13.756Z",
+      "version": 1
+    },
+    {
+      "id": "arr-notes-structured",
+      "type": "arrow",
+      "x": 372.9165617007963,
+      "y": 303.4678422840613,
+      "strokeColor": "#d97706",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          464.1668765984073,
+          -67.56859596052763
+        ]
+      ],
+      "start": {
+        "id": "notes-csv"
+      },
+      "end": {
+        "id": "structured-notes"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.756Z",
+      "updatedAt": "2026-10-15T06:37:13.756Z",
+      "version": 1
+    },
+    {
+      "id": "arr-structured-retriever",
+      "type": "arrow",
+      "x": 1015,
+      "y": 253,
+      "strokeColor": "#d97706",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "start": {
+        "id": "structured-notes"
+      },
+      "end": {
+        "id": "vector-retriever"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.756Z",
+      "updatedAt": "2026-10-15T06:37:13.756Z",
+      "version": 1
+    },
+    {
+      "id": "arr-flag-retriever",
+      "type": "arrow",
+      "x": 710.8149719637879,
+      "y": 451.528153749151,
+      "strokeColor": "#dc2626",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          213.93967632558883,
+          -103.05630749830198
+        ]
+      ],
+      "start": {
+        "id": "flag-gate"
+      },
+      "end": {
+        "id": "vector-retriever"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.756Z",
+      "updatedAt": "2026-10-15T06:37:13.756Z",
+      "version": 1
+    },
+    {
+      "id": "arr-retriever-gate",
+      "type": "arrow",
+      "x": 1015,
+      "y": 353,
+      "strokeColor": "#9333ea",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "start": {
+        "id": "vector-retriever"
+      },
+      "end": {
+        "id": "verdict-gate"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.756Z",
+      "updatedAt": "2026-10-15T06:37:13.756Z",
+      "version": 1
+    },
+    {
+      "id": "arr-gate-template",
+      "type": "arrow",
+      "x": 1175.0811874171243,
+      "y": 360.8656246689311,
+      "strokeColor": "#16a34a",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          185.09015041827683,
+          -111.73124933786224
+        ]
+      ],
+      "start": {
+        "id": "verdict-gate"
+      },
+      "end": {
+        "id": "template-reasons"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.756Z",
+      "updatedAt": "2026-10-15T06:37:13.756Z",
+      "version": 1
+    },
+    {
+      "id": "arr-template-csv",
+      "type": "arrow",
+      "x": 1425,
+      "y": 253,
+      "strokeColor": "#16a34a",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "start": {
+        "id": "template-reasons"
+      },
+      "end": {
+        "id": "contract-csv"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.756Z",
+      "updatedAt": "2026-10-15T06:37:13.756Z",
+      "version": 1
+    },
+    {
+      "id": "arr-csv-ui",
+      "type": "arrow",
+      "x": 1425,
+      "y": 353,
+      "strokeColor": "#2563eb",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "start": {
+        "id": "contract-csv"
+      },
+      "end": {
+        "id": "dashboard-ui"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.756Z",
+      "updatedAt": "2026-10-15T06:37:13.756Z",
+      "version": 1
+    },
+    {
+      "id": "arr-csv-qa",
+      "type": "arrow",
+      "x": 1425,
+      "y": 353,
+      "strokeColor": "#2563eb",
+      "roughness": 1,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          99
+        ]
+      ],
+      "start": {
+        "id": "contract-csv"
+      },
+      "end": {
+        "id": "grounded-qa"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-10-15T06:37:13.757Z",
+      "updatedAt": "2026-10-15T06:37:13.757Z",
+      "version": 1
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  },
+  "files": {}
+}
+```
+%%
+
+## Text Elements
+- Routewatch System Architecture
+- AI Shipping-Cost Anomaly Detection & Deterministic Grounding Assistant
+- 1. Data Ingestion Tier
+- 2. Metrics & Baselines Engine
+- 3. Grounding & Deterministic Gates
+- 4. Outputs & Interfaces
