@@ -73,6 +73,9 @@ def check_note_applicability(
         return False, note.rejection_reason or f"has effect '{note.effect}' which does not justify a cost rise"
 
     # 4. Magnitude check
+    if vs_own_pct is not None and vs_own_pct <= 0:
+        return False, f"observed cost did not increase ({vs_own_pct:+.1f}%)"
+
     if config.magnitude_check and note.stated_magnitude_pct and vs_own_pct is not None:
         upper_bound = max(note.stated_magnitude_pct)
         max_allowed = upper_bound + config.magnitude_tolerance_pp
@@ -94,6 +97,7 @@ def evaluate_candidate(
     vs_similar_routes: str,
     retriever: NoteRetriever,
     config: Config,
+    is_candidate: bool = True,
 ) -> VerdictResult:
     """Evaluate candidate route-week against retrieved notes using deterministic gates."""
     week_start = datetime.strptime(week_of, "%Y-%m-%d").date()
@@ -101,18 +105,19 @@ def evaluate_candidate(
 
     passing_note: Optional[StructuredNote] = None
 
-    # Step 1: Check retrieved notes for justification
-    for note, _ in retrieved:
-        applicable, _ = check_note_applicability(
-            note=note,
-            route=route,
-            week_start=week_start,
-            vs_own_pct=vs_own_pct,
-            config=config,
-        )
-        if applicable:
-            passing_note = note
-            break
+    # Step 1: If row is a candidate and costs actually rose, check retrieved notes for justification
+    if is_candidate and (vs_own_pct is None or vs_own_pct > 0):
+        for note, _ in retrieved:
+            applicable, _ = check_note_applicability(
+                note=note,
+                route=route,
+                week_start=week_start,
+                vs_own_pct=vs_own_pct,
+                config=config,
+            )
+            if applicable:
+                passing_note = note
+                break
 
     if passing_note:
         # Justified Verdict
